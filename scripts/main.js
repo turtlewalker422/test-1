@@ -45,6 +45,16 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             nav.classList.remove('scrolled');
         }
+
+        // Show/hide scroll to top button
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+        if (scrollToTopBtn) {
+            if (window.scrollY > 300) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        }
     });
 
     // ========================================
@@ -335,6 +345,20 @@ document.addEventListener('DOMContentLoaded', function() {
             tourModal.classList.remove('active');
         }
     });
+
+    // ========================================
+    // SCROLL TO TOP BUTTON
+    // ========================================
+
+    const scrollToTopBtn = document.getElementById('scrollToTop');
+    if (scrollToTopBtn) {
+        scrollToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
 
     // ========================================
     // INITIALIZE VISUALIZATIONS

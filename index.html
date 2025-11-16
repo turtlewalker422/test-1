@@ -102,7 +102,7 @@
 
             <div class="comparison-chart">
                 <h3>Performance Comparison</h3>
-                <canvas id="performanceChart" height="80"></canvas>
+                <canvas id="performanceChart" height="60"></canvas>
             </div>
         </div>
     </section>
@@ -590,7 +590,7 @@
                 <div class="results-grid">
                     <div class="result-card">
                         <h4>High Speed Scenarios</h4>
-                        <canvas id="highSpeedChart" height="150"></canvas>
+                        <canvas id="highSpeedChart" height="100"></canvas>
                         <div class="result-insight">
                             <p><strong>Key Finding:</strong> LBK MPC achieves costs only 3.7% higher
                             than NL MPC, while LL MPC is 19.5% higher</p>
@@ -598,7 +598,7 @@
                     </div>
                     <div class="result-card">
                         <h4>Computational Performance</h4>
-                        <canvas id="compTimeChart" height="150"></canvas>
+                        <canvas id="compTimeChart" height="100"></canvas>
                         <div class="result-insight">
                             <p><strong>Key Finding:</strong> LBK MPC is 9.5x faster than NL MPC,
                             with minimal overhead vs LL MPC</p>
@@ -824,6 +824,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" title="Scroll to top">↑</button>
 
     <!-- Scripts -->
     <script src="scripts/vehicle-model.js"></script>
