@@ -3,28 +3,834 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Paper Interface</title>
+    <title>Koopman Operator MPC for Autonomous Driving - Interactive Explorer</title>
+    <meta name="description" content="Interactive exploration of Koopman operator-based Model Predictive Control for autonomous vehicle control">
+
+    <!-- External Dependencies -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <link rel="stylesheet" href="styles/main.css">
+
+    <!-- KaTeX for math rendering -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Interactive Paper Interface</h1>
-            <p class="subtitle">Explore and interact with research content</p>
-        </header>
-
-        <main id="content">
-            <div class="welcome">
-                <h2>Welcome</h2>
-                <p>This interface will be populated with interactive content based on the uploaded paper.</p>
+    <!-- Navigation -->
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="nav-icon">🚗</span>
+                <span class="nav-title">Koopman MPC Explorer</span>
             </div>
-        </main>
+            <div class="nav-links">
+                <a href="#hero" class="nav-link active">Home</a>
+                <a href="#problem" class="nav-link">Problem</a>
+                <a href="#koopman" class="nav-link">Koopman Operator</a>
+                <a href="#vehicle" class="nav-link">Vehicle Model</a>
+                <a href="#mpc" class="nav-link">MPC</a>
+                <a href="#simulation" class="nav-link">Simulation</a>
+                <a href="#results" class="nav-link">Results</a>
+            </div>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
 
-        <footer>
-            <p>Interactive Web Interface</p>
-        </footer>
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Autonomous Driving Control</h1>
+            <h2 class="hero-subtitle">Using Koopman Operator-Based Model Predictive Control</h2>
+            <p class="hero-description">
+                Explore how mathematical operators can transform nonlinear vehicle dynamics into
+                efficient linear models for real-time autonomous driving control
+            </p>
+            <div class="hero-authors">
+                <p>Siyuan Yu, Congkai Shen, Tulga Ersal</p>
+                <p class="hero-affiliation">University of Michigan, Ann Arbor</p>
+            </div>
+            <div class="hero-cta">
+                <a href="#tour-start" class="btn btn-primary" id="startTour">Start Interactive Tour</a>
+                <a href="#simulation" class="btn btn-secondary">Try Simulation</a>
+            </div>
+
+            <!-- Animated vehicle visualization -->
+            <div class="hero-animation">
+                <canvas id="heroCanvas" width="800" height="300"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Statement Section -->
+    <section id="problem" class="section">
+        <div class="container">
+            <h2 class="section-title">The Challenge</h2>
+            <p class="section-intro">
+                Autonomous vehicles must make split-second decisions at high speeds. The fundamental challenge:
+                <strong>How do we achieve both accuracy AND computational speed?</strong>
+            </p>
+
+            <div class="trilemma">
+                <div class="trilemma-item">
+                    <div class="trilemma-icon">🎯</div>
+                    <h3>Accuracy</h3>
+                    <p>Nonlinear MPC captures real vehicle behavior</p>
+                    <div class="metric">133ms avg solve time</div>
+                    <div class="badge badge-warning">Too slow for real-time</div>
+                </div>
+                <div class="trilemma-item">
+                    <div class="trilemma-icon">⚡</div>
+                    <h3>Speed</h3>
+                    <p>Linear MPC solves quickly</p>
+                    <div class="metric">4ms avg solve time</div>
+                    <div class="badge badge-warning">Fails at high speeds</div>
+                </div>
+                <div class="trilemma-item trilemma-solution">
+                    <div class="trilemma-icon">✨</div>
+                    <h3>Solution</h3>
+                    <p>Linearized Bilinear Koopman (LBK) MPC</p>
+                    <div class="metric">14ms avg solve time</div>
+                    <div class="badge badge-success">Near-NL accuracy!</div>
+                </div>
+            </div>
+
+            <div class="comparison-chart">
+                <h3>Performance Comparison</h3>
+                <canvas id="performanceChart" height="80"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Koopman Operator Explanation -->
+    <section id="koopman" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Understanding the Koopman Operator</h2>
+
+            <!-- Learning Level Selector -->
+            <div class="level-selector">
+                <button class="level-btn active" data-level="1">
+                    <span class="level-num">1</span>
+                    <span class="level-name">Intuition</span>
+                </button>
+                <button class="level-btn" data-level="2">
+                    <span class="level-num">2</span>
+                    <span class="level-name">Visual</span>
+                </button>
+                <button class="level-btn" data-level="3">
+                    <span class="level-num">3</span>
+                    <span class="level-name">Mathematical</span>
+                </button>
+            </div>
+
+            <!-- Level 1: Intuition -->
+            <div class="learning-content active" data-content="1">
+                <h3>The Shadow Analogy</h3>
+                <p class="intro-text">
+                    Imagine a 3D object casting a 2D shadow. The shadow moves in complex, nonlinear ways.
+                    But if you know the shadow is from a simple rotating sphere, you can predict its motion linearly!
+                </p>
+                <div class="analogy-visual">
+                    <canvas id="shadowCanvas" width="600" height="400"></canvas>
+                    <div class="analogy-explanation">
+                        <p><strong>The Key Insight:</strong></p>
+                        <p>🔵 The shadow (2D) moves nonlinearly</p>
+                        <p>🌐 The sphere (3D) rotates linearly</p>
+                        <p>✨ By "lifting" to 3D, we see the linear pattern!</p>
+                    </div>
+                </div>
+                <p class="key-concept">
+                    <strong>Koopman Operator:</strong> Lifts nonlinear vehicle dynamics to a higher-dimensional
+                    space where they behave linearly!
+                </p>
+            </div>
+
+            <!-- Level 2: Visual -->
+            <div class="learning-content" data-content="2">
+                <h3>Dimensional Lifting Visualization</h3>
+                <div class="lifting-demo">
+                    <div class="demo-panel">
+                        <h4>Original State Space (Nonlinear)</h4>
+                        <canvas id="originalSpace" width="400" height="400"></canvas>
+                        <p>Vehicle trajectory curves unpredictably</p>
+                    </div>
+                    <div class="demo-arrow">→</div>
+                    <div class="demo-panel">
+                        <h4>Lifted Space (Linear)</h4>
+                        <canvas id="liftedSpace" width="400" height="400"></canvas>
+                        <p>Same trajectory becomes linear!</p>
+                    </div>
+                </div>
+                <div class="interactive-lifting">
+                    <h4>Try It: Adjust Polynomial Degree</h4>
+                    <div class="control-group">
+                        <label for="polyDegree">Polynomial Degree (ρ): <span id="polyDegreeValue">3</span></label>
+                        <input type="range" id="polyDegree" min="1" max="7" value="3" step="1">
+                    </div>
+                    <div class="lifting-info">
+                        <div class="info-card">
+                            <div class="info-label">Basis Functions</div>
+                            <div class="info-value" id="basisCount">36</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Model Accuracy</div>
+                            <div class="info-value" id="accuracyValue">High</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Computation Cost</div>
+                            <div class="info-value" id="computationValue">Medium</div>
+                        </div>
+                    </div>
+                    <canvas id="basisChart" height="60"></canvas>
+                </div>
+            </div>
+
+            <!-- Level 3: Mathematical -->
+            <div class="learning-content" data-content="3">
+                <h3>Mathematical Framework</h3>
+                <div class="math-content">
+                    <div class="equation-box">
+                        <p><strong>Koopman Operator Definition:</strong></p>
+                        <div class="equation">
+                            $$ \mathcal{K}f(\xi(t), \zeta(t)) = \frac{\partial f}{\partial \xi}\frac{d\xi}{dt} = \frac{\partial f}{\partial \xi}F(\xi(t), \zeta(t)) $$
+                        </div>
+                    </div>
+
+                    <div class="equation-box">
+                        <p><strong>Bilinear Form:</strong></p>
+                        <div class="equation">
+                            $$ \dot{\tilde{\xi}} = \tilde{A}\tilde{\xi} + \tilde{B}\tilde{\zeta} + \sum_{j=1}^{\tilde{n}}\tilde{\xi}_j \tilde{N}_j \tilde{\zeta} $$
+                        </div>
+                        <p class="equation-note">The last term captures control-affine dynamics!</p>
+                    </div>
+
+                    <div class="equation-box">
+                        <p><strong>Linearization Strategy:</strong></p>
+                        <div class="equation">
+                            $$ \dot{\tilde{\xi}} = \bar{A}\tilde{\xi} + \bar{B}\tilde{\zeta} = \tilde{A}\tilde{\xi} + \left[\tilde{B} + \sum_{j=1}^{\tilde{n}}\tilde{\xi}_j(0)\tilde{N}_j\right]\tilde{\zeta} $$
+                        </div>
+                        <p class="equation-note">Freeze coupling states at t=0 in each receding horizon</p>
+                    </div>
+
+                    <div class="edmd-visualization">
+                        <h4>Extended Dynamic Mode Decomposition (EDMD)</h4>
+                        <div class="algorithm-steps">
+                            <div class="step">
+                                <div class="step-num">1</div>
+                                <div class="step-content">
+                                    <h5>Generate Training Data</h5>
+                                    <p>5000 trajectories with randomized initial conditions</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">2</div>
+                                <div class="step-content">
+                                    <h5>Lift to Observable Space</h5>
+                                    <p>$p^{(n)} = \Phi(\xi^{(n)}(t), \zeta^{(n)}(t))$</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">3</div>
+                                <div class="step-content">
+                                    <h5>Compute Derivatives</h5>
+                                    <p>$q^{(n)} = \frac{d}{dt}\Phi(\xi^{(n)}(t), \zeta^{(n)}(t))$</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">4</div>
+                                <div class="step-content">
+                                    <h5>Linear Regression</h5>
+                                    <p>$\min_{\mathcal{K}} \|\mathcal{K}P - Q\|_F^2$</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">5</div>
+                                <div class="step-content">
+                                    <h5>Extract Operator</h5>
+                                    <p>$\mathcal{K}^* = QP^\dagger$</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vehicle Dynamics Section -->
+    <section id="vehicle" class="section">
+        <div class="container">
+            <h2 class="section-title">Vehicle Dynamics: Bicycle Model</h2>
+
+            <div class="vehicle-model-split">
+                <div class="model-visual">
+                    <h3>3-DOF Bicycle Model</h3>
+                    <canvas id="vehicleCanvas" width="500" height="500"></canvas>
+                    <div class="model-legend">
+                        <div class="legend-item"><span class="legend-color" style="background:#3498db"></span> CG (Center of Gravity)</div>
+                        <div class="legend-item"><span class="legend-color" style="background:#e74c3c"></span> Tire Forces (Fyf, Fyr)</div>
+                        <div class="legend-item"><span class="legend-color" style="background:#2ecc71"></span> Velocities (u, v, r)</div>
+                    </div>
+                </div>
+
+                <div class="model-equations">
+                    <h3>State & Control Vectors</h3>
+                    <div class="state-display">
+                        <div class="vector-box">
+                            <h4>States (ξ)</h4>
+                            <div class="state-item">
+                                <span class="state-label">x:</span>
+                                <span class="state-desc">Global X position</span>
+                                <span class="state-value" id="stateX">0.0 m</span>
+                            </div>
+                            <div class="state-item">
+                                <span class="state-label">y:</span>
+                                <span class="state-desc">Global Y position</span>
+                                <span class="state-value" id="stateY">0.0 m</span>
+                            </div>
+                            <div class="state-item">
+                                <span class="state-label">r:</span>
+                                <span class="state-desc">Yaw rate</span>
+                                <span class="state-value" id="stateR">0.0 rad/s</span>
+                            </div>
+                            <div class="state-item">
+                                <span class="state-label">v:</span>
+                                <span class="state-desc">Lateral speed</span>
+                                <span class="state-value" id="stateV">0.0 m/s</span>
+                            </div>
+                            <div class="state-item">
+                                <span class="state-label">ψ:</span>
+                                <span class="state-desc">Yaw angle</span>
+                                <span class="state-value" id="statePsi">0.0 rad</span>
+                            </div>
+                            <div class="state-item">
+                                <span class="state-label">u:</span>
+                                <span class="state-desc">Longitudinal speed</span>
+                                <span class="state-value" id="stateU">15.0 m/s</span>
+                            </div>
+                        </div>
+
+                        <div class="vector-box">
+                            <h4>Controls (ζ)</h4>
+                            <div class="control-item">
+                                <label for="controlAx">ax (accel): <span id="axValue">0.0</span> m/s²</label>
+                                <input type="range" id="controlAx" min="-5" max="5" value="0" step="0.1">
+                            </div>
+                            <div class="control-item">
+                                <label for="controlDelta">δf (steer): <span id="deltaValue">0.0</span> rad</label>
+                                <input type="range" id="controlDelta" min="-0.5" max="0.5" value="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dynamics-equation">
+                        <p><strong>Vehicle Dynamics:</strong></p>
+                        <div class="equation">
+                            $$ \dot{\xi} = A(\xi) + B\zeta $$
+                        </div>
+                        <button class="btn btn-sm" id="showFullDynamics">Show Full Equations</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Comparison -->
+            <div class="model-comparison">
+                <h3>Model Comparison: Open-Loop Prediction</h3>
+                <div class="comparison-controls">
+                    <label for="refreshTime">Refreshing Time: <span id="refreshTimeValue">0.5</span>s</label>
+                    <input type="range" id="refreshTime" min="0.25" max="2.5" value="0.5" step="0.25">
+                    <button class="btn btn-primary" id="runComparison">Run Comparison</button>
+                </div>
+                <div class="comparison-results">
+                    <canvas id="comparisonChart" height="80"></canvas>
+                </div>
+                <div class="model-cards">
+                    <div class="model-card">
+                        <h4>BK Model</h4>
+                        <p>Bilinear Koopman</p>
+                        <div class="model-metric">RMSE: <span id="rmse-bk">-</span></div>
+                    </div>
+                    <div class="model-card highlight">
+                        <h4>LBK Model</h4>
+                        <p>Linearized Bilinear Koopman</p>
+                        <div class="model-metric">RMSE: <span id="rmse-lbk">-</span></div>
+                    </div>
+                    <div class="model-card">
+                        <h4>LK Model</h4>
+                        <p>Linear Koopman</p>
+                        <div class="model-metric">RMSE: <span id="rmse-lk">-</span></div>
+                    </div>
+                    <div class="model-card">
+                        <h4>LL Model</h4>
+                        <p>Locally Linearized</p>
+                        <div class="model-metric">RMSE: <span id="rmse-ll">-</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MPC Section -->
+    <section id="mpc" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Model Predictive Control (MPC)</h2>
+
+            <div class="mpc-explanation">
+                <p class="intro-text">
+                    MPC predicts future vehicle states and optimizes control inputs to minimize cost
+                    while respecting constraints. It's like chess - thinking several moves ahead!
+                </p>
+            </div>
+
+            <div class="mpc-visualization">
+                <div class="mpc-concept">
+                    <canvas id="mpcHorizonCanvas" width="800" height="300"></canvas>
+                    <div class="mpc-legend">
+                        <div><span style="color:#3498db">━━</span> Prediction Horizon (Np)</div>
+                        <div><span style="color:#e74c3c">━━</span> Control Horizon (Nc)</div>
+                        <div><span style="color:#2ecc71">━━</span> Executed Control</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mpc-parameters">
+                <h3>MPC Parameters</h3>
+                <div class="param-grid">
+                    <div class="param-control">
+                        <label>Prediction Horizon: <span id="npValue">3.0</span>s</label>
+                        <input type="range" id="paramNp" min="1" max="5" value="3" step="0.5">
+                    </div>
+                    <div class="param-control">
+                        <label>Control Horizon: <span id="ncValue">0.5</span>s</label>
+                        <input type="range" id="paramNc" min="0.1" max="1" value="0.5" step="0.1">
+                    </div>
+                    <div class="param-control">
+                        <label>Sampling Time: <span id="nsValue">0.1</span>s</label>
+                        <input type="range" id="paramNs" min="0.05" max="0.2" value="0.1" step="0.05">
+                    </div>
+                </div>
+            </div>
+
+            <div class="cost-function">
+                <h3>Cost Function Tuning</h3>
+                <div class="equation-box">
+                    <div class="equation">
+                        $$ J = \int_{t_0}^{t_f} \left[ w_{\delta_f}\delta_f^2 + w_{a_x}a_x^2 + w_y\epsilon_y^2 + w_\psi\epsilon_\psi^2 \right] dt $$
+                    </div>
+                </div>
+                <div class="weight-controls">
+                    <div class="weight-item">
+                        <label>Steering Effort (w<sub>δf</sub>): <span id="wDeltaValue">1.0</span></label>
+                        <input type="range" id="weightDelta" min="0.1" max="10" value="1" step="0.1">
+                    </div>
+                    <div class="weight-item">
+                        <label>Accel Effort (w<sub>ax</sub>): <span id="wAxValue">0.1</span></label>
+                        <input type="range" id="weightAx" min="0.01" max="1" value="0.1" step="0.01">
+                    </div>
+                    <div class="weight-item">
+                        <label>Lane Keeping (w<sub>y</sub>): <span id="wYValue">10.0</span></label>
+                        <input type="range" id="weightY" min="1" max="50" value="10" step="1">
+                    </div>
+                    <div class="weight-item">
+                        <label>Heading Error (w<sub>ψ</sub>): <span id="wPsiValue">5.0</span></label>
+                        <input type="range" id="weightPsi" min="1" max="20" value="5" step="0.5">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Simulation Section -->
+    <section id="simulation" class="section">
+        <div class="container">
+            <h2 class="section-title">Interactive Lane Change Simulation</h2>
+
+            <div class="simulation-controls">
+                <div class="scenario-selector">
+                    <h3>Select Scenario</h3>
+                    <div class="scenario-buttons">
+                        <button class="scenario-btn active" data-scenario="low">Low Speed (15 m/s)</button>
+                        <button class="scenario-btn" data-scenario="high">High Speed (26 m/s)</button>
+                        <button class="scenario-btn" data-scenario="custom">Custom</button>
+                    </div>
+                </div>
+
+                <div class="controller-selector">
+                    <h3>Controllers to Compare</h3>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="enableNL" checked> Nonlinear MPC (NL)</label>
+                        <label><input type="checkbox" id="enableLBK" checked> LBK MPC (Proposed)</label>
+                        <label><input type="checkbox" id="enableLL" checked> Linear MPC (LL)</label>
+                    </div>
+                </div>
+
+                <div class="playback-controls">
+                    <button class="btn btn-primary btn-lg" id="startSim">▶ Start Simulation</button>
+                    <button class="btn btn-secondary" id="pauseSim" disabled>⏸ Pause</button>
+                    <button class="btn btn-secondary" id="resetSim">↻ Reset</button>
+                    <div class="speed-control">
+                        <label>Playback Speed: <span id="playbackSpeedValue">1.0</span>x</label>
+                        <input type="range" id="playbackSpeed" min="0.25" max="4" value="1" step="0.25">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Simulation Canvas -->
+            <div class="simulation-main">
+                <canvas id="simulationCanvas" width="1000" height="400"></canvas>
+                <div class="simulation-status">
+                    <div class="status-item">
+                        <span class="status-label">Time:</span>
+                        <span class="status-value" id="simTime">0.00s</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Speed:</span>
+                        <span class="status-value" id="simSpeed">0.0 m/s</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Position:</span>
+                        <span class="status-value" id="simPosition">(0, 0)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="performance-metrics">
+                <h3>Real-Time Performance Metrics</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>NL MPC</h4>
+                        <div class="metric-row">
+                            <span>Solve Time:</span>
+                            <span id="solveTime-nl">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Total Cost:</span>
+                            <span id="cost-nl">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Status:</span>
+                            <span id="status-nl" class="badge">-</span>
+                        </div>
+                    </div>
+                    <div class="metric-card highlight">
+                        <h4>LBK MPC</h4>
+                        <div class="metric-row">
+                            <span>Solve Time:</span>
+                            <span id="solveTime-lbk">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Total Cost:</span>
+                            <span id="cost-lbk">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Status:</span>
+                            <span id="status-lbk" class="badge">-</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>LL MPC</h4>
+                        <div class="metric-row">
+                            <span>Solve Time:</span>
+                            <span id="solveTime-ll">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Total Cost:</span>
+                            <span id="cost-ll">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Status:</span>
+                            <span id="status-ll" class="badge">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- State Trajectories -->
+            <div class="trajectory-plots">
+                <h3>State Trajectories Over Time</h3>
+                <div class="plots-grid">
+                    <div class="plot-container">
+                        <canvas id="plotY"></canvas>
+                    </div>
+                    <div class="plot-container">
+                        <canvas id="plotV"></canvas>
+                    </div>
+                    <div class="plot-container">
+                        <canvas id="plotR"></canvas>
+                    </div>
+                    <div class="plot-container">
+                        <canvas id="plotPsi"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results from Paper Section -->
+    <section id="results" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Research Results</h2>
+
+            <div class="results-intro">
+                <p>
+                    The proposed LBK MPC was tested against NL MPC and LL MPC across 50 randomized
+                    scenarios. Here are the key findings:
+                </p>
+            </div>
+
+            <!-- Statistical Analysis -->
+            <div class="statistical-results">
+                <h3>Statistical Performance Analysis</h3>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h4>High Speed Scenarios</h4>
+                        <canvas id="highSpeedChart" height="150"></canvas>
+                        <div class="result-insight">
+                            <p><strong>Key Finding:</strong> LBK MPC achieves costs only 3.7% higher
+                            than NL MPC, while LL MPC is 19.5% higher</p>
+                        </div>
+                    </div>
+                    <div class="result-card">
+                        <h4>Computational Performance</h4>
+                        <canvas id="compTimeChart" height="150"></canvas>
+                        <div class="result-insight">
+                            <p><strong>Key Finding:</strong> LBK MPC is 9.5x faster than NL MPC,
+                            with minimal overhead vs LL MPC</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Fidelity Results -->
+            <div class="fidelity-results">
+                <h3>Model Fidelity Comparison</h3>
+                <div class="fidelity-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Position Error</th>
+                                <th>Lateral Speed Error</th>
+                                <th>Yaw Rate Error</th>
+                                <th>Yaw Angle Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="table-highlight">
+                                <td><strong>BK (0.5s)</strong></td>
+                                <td>0.49</td>
+                                <td>0.26</td>
+                                <td>0.26</td>
+                                <td>0.51</td>
+                            </tr>
+                            <tr class="table-highlight">
+                                <td><strong>LBK (0.5s)</strong></td>
+                                <td>0.53</td>
+                                <td>0.15</td>
+                                <td>0.29</td>
+                                <td>0.36</td>
+                            </tr>
+                            <tr>
+                                <td>LL (0.5s)</td>
+                                <td>3.78</td>
+                                <td>13.32</td>
+                                <td>5.04</td>
+                                <td>8.56</td>
+                            </tr>
+                            <tr>
+                                <td>LK (0.5s)</td>
+                                <td>21.93</td>
+                                <td>30.54</td>
+                                <td>17.48</td>
+                                <td>20.03</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="table-note">
+                    Values are normalized RMSE. Lower is better. BK model at 0.25s used as baseline (0.25).
+                </p>
+            </div>
+
+            <!-- Key Contributions -->
+            <div class="contributions">
+                <h3>Key Contributions of This Work</h3>
+                <div class="contributions-grid">
+                    <div class="contribution-item">
+                        <div class="contribution-num">1</div>
+                        <div class="contribution-text">
+                            <h4>Bilinear Koopman Model</h4>
+                            <p>First vehicle dynamics model using bilinear Koopman realization
+                            that captures control-affine dynamics</p>
+                        </div>
+                    </div>
+                    <div class="contribution-item">
+                        <div class="contribution-num">2</div>
+                        <div class="contribution-text">
+                            <h4>Linearization Strategy</h4>
+                            <p>Novel approach to linearize bilinear model by freezing coupling
+                            states in prediction horizon</p>
+                        </div>
+                    </div>
+                    <div class="contribution-item">
+                        <div class="contribution-num">3</div>
+                        <div class="contribution-text">
+                            <h4>Comprehensive Comparison</h4>
+                            <p>Systematic fidelity comparison showing importance of control-affine
+                            dynamics in vehicle modeling</p>
+                        </div>
+                    </div>
+                    <div class="contribution-item">
+                        <div class="contribution-num">4</div>
+                        <div class="contribution-text">
+                            <h4>Real-Time MPC Framework</h4>
+                            <p>Complete linear MPC implementation for simultaneous planning and
+                            control in autonomous driving</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Glossary & References -->
+    <section id="glossary" class="section">
+        <div class="container">
+            <h2 class="section-title">Glossary & References</h2>
+
+            <div class="glossary-tabs">
+                <button class="glossary-tab active" data-tab="terms">Key Terms</button>
+                <button class="glossary-tab" data-tab="references">References</button>
+            </div>
+
+            <div class="glossary-content active" data-content="terms">
+                <div class="glossary-grid">
+                    <div class="glossary-item">
+                        <h4>Koopman Operator</h4>
+                        <p>A mathematical operator that lifts nonlinear dynamics to a higher-dimensional
+                        space where they evolve linearly.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>EDMD</h4>
+                        <p>Extended Dynamic Mode Decomposition - algorithm for approximating the
+                        Koopman operator from data.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>Bilinear Systems</h4>
+                        <p>Systems with dynamics of the form: ẋ = Ax + Bu + Σx<sub>j</sub>N<sub>j</sub>u,
+                        capturing state-control coupling.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>Control-Affine Dynamics</h4>
+                        <p>Terms in the dynamics where states and controls are multiplied together,
+                        representing their coupling.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>MPC</h4>
+                        <p>Model Predictive Control - optimization-based control that predicts future
+                        states and optimizes control inputs.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>Bicycle Model</h4>
+                        <p>Simplified vehicle model treating front and rear axles as single wheels,
+                        balancing fidelity and simplicity.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>Lifting Function (Φ)</h4>
+                        <p>Function that maps original states to higher-dimensional observable space.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>Drivable Tube</h4>
+                        <p>Collision-free corridor defined for vehicle center of gravity to ensure
+                        safe trajectories.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glossary-content" data-content="references">
+                <div class="references-list">
+                    <div class="reference-item">
+                        <p class="reference-citation">
+                            Yu, S., Shen, C., and Ersal, T. (2022). "Autonomous driving using linear
+                            model predictive control with a Koopman operator based bilinear vehicle model."
+                            <em>IFAC International Symposium on Advances in Automotive Control</em>, Columbus, Ohio.
+                        </p>
+                    </div>
+                    <div class="reference-item">
+                        <p class="reference-citation">
+                            Bruder, D., Fu, X., and Vasudevan, R. (2021). "Advantages of bilinear
+                            Koopman realizations for the modeling and control of systems with unknown dynamics."
+                            <em>IEEE Robotics and Automation Letters</em>, 6(3), 4369-4376.
+                        </p>
+                    </div>
+                    <div class="reference-item">
+                        <p class="reference-citation">
+                            Williams, M.O., Kevrekidis, I.G., and Rowley, C.W. (2015). "A data-driven
+                            approximation of the Koopman operator: Extending dynamic mode decomposition."
+                            <em>Journal of Nonlinear Science</em>, 25(6), 1307-1346.
+                        </p>
+                    </div>
+                    <div class="reference-item">
+                        <p class="reference-citation">
+                            Koopman, B.O. (1931). "Hamiltonian systems and transformation in Hilbert space."
+                            <em>Proceedings of the National Academy of Sciences</em>, 17(5), 315.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About This Interface</h4>
+                    <p>Interactive exploration of Koopman operator-based MPC for autonomous driving research.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Authors</h4>
+                    <p>Siyuan Yu, Congkai Shen, Tulga Ersal</p>
+                    <p>University of Michigan, Ann Arbor</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <p><a href="data/paper124.pdf" target="_blank">Download Paper (PDF)</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2022 University of Michigan. Educational use only.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Tour Modal -->
+    <div id="tourModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2>Welcome to the Interactive Tour!</h2>
+            <p>This guided tour will help you understand Koopman operator-based MPC for autonomous driving.</p>
+            <div class="tour-options">
+                <button class="btn btn-primary" id="beginnerTour">Beginner (15 min)</button>
+                <button class="btn btn-primary" id="intermediateTour">Intermediate (25 min)</button>
+                <button class="btn btn-primary" id="advancedTour">Advanced (45 min)</button>
+            </div>
+        </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="scripts/vehicle-model.js"></script>
+    <script src="scripts/koopman-model.js"></script>
+    <script src="scripts/mpc-controller.js"></script>
+    <script src="scripts/simulation.js"></script>
+    <script src="scripts/visualizations.js"></script>
     <script src="scripts/main.js"></script>
 </body>
 </html>
